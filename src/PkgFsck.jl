@@ -26,23 +26,24 @@ function redownload(fail::FsckFailure)
 end
 
 
-function fsck(; remove_cov_files::Bool=true)
+function fsck(; remove_cov_files::Bool=true, depot_path::Vector{String}=DEPOT_PATH)
     failed_packages = FsckFailure[]
     registries = Pkg.Registry.reachable_registries()
     for reg in registries
         for (_, pkg) in reg
-            fsck_package!(failed_packages, pkg; remove_cov_files)
+            fsck_package!(failed_packages, pkg; remove_cov_files, depot_path)
         end
     end
     return failed_packages
 end
 
-function fsck_package!(failed_packages::AbstractVector{FsckFailure}, pkg::Registry.PkgEntry; remove_cov_files::Bool)
+function fsck_package!(failed_packages::AbstractVector{FsckFailure}, pkg::Registry.PkgEntry;
+                       remove_cov_files::Bool, depot_path::Vector{String})
     pkginfo = Registry.registry_info(pkg)
     for (v, vinfo) in pkginfo.version_info
         tree_hash = vinfo.git_tree_sha1
         for slug in (Base.version_slug(pkg.uuid, tree_hash), Base.version_slug(pkg.uuid, tree_hash, 4))
-            for depot in DEPOT_PATH
+            for depot in depot_path
                 path = joinpath(depot, "packages", pkg.name, slug)
                 if ispath(path)
                     has_build_file = isdir(joinpath(path, "deps"))
