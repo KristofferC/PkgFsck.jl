@@ -15,15 +15,15 @@ julia> touch(joinpath(dirname(example_path), "corruption"))
 ```
 
 ```julia
-julia> using PkgFsck
+julia> import PkgFsck
 
-julia> failures = fsck();
+julia> failures = PkgFsck.fsck();
 
 julia> filter!(x->!x.has_build_file, failures) # See Caveats below
 1-element Vector{PkgFsck.FsckFailure}:
  PkgFsck.FsckFailure("/home/kc/.julia/packages/Example/aqsx3", UUID("7876af07-990d-54b4-ab0e-23690620f79a"), SHA1("46e44e869b4d90b96bd8ed1fdcf32244fddfb6cc"), false)
 
-julia> foreach(redownload, failures) # Removes the corrupted folder and redownloads the package
+julia> foreach(PkgFsck.redownload, failures) # Removes the corrupted folder and redownloads the package
 ```
 
 ## Caveats
